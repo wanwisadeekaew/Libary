@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise Library</title>
+<style>
+:root {
+  --bg: #FFFFFF;
+  --bg2: #F4F7F0;
+  --card: #FFFFFF;
+  --border: #DDE5D5;
+  --green: #3D7A10;
+  --green-dim: rgba(61,122,16,0.08);
+  --green-mid: rgba(61,122,16,0.2);
+  --coral: #C04018;
+  --coral-dim: rgba(192,64,24,0.08);
+  --amber: #B06010;
+  --amber-dim: rgba(176,96,16,0.08);
+  --sky: #1070A0;
+  --sky-dim: rgba(16,112,160,0.08);
+  --purple: #6040A0;
+  --purple-dim: rgba(96,64,160,0.08);
+  --text: #1A2010;
+  --text-dim: #7A8C6E;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg2); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+
+/* HEADER */
+.header { background:#1A2E10; padding:28px 20px 22px; position:sticky; top:0; z-index:100; }
+.header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.header h1 { font-family:Georgia,serif; font-size:26px; font-weight:700; color:#fff; }
+.header-sub { font-size:12px; color:rgba(255,255,255,0.55); margin-top:2px; }
+.ex-count { background:rgba(184,224,74,0.2); color:#B8E04A; font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; letter-spacing:1px; }
+
+/* SEARCH */
+.search-wrap { position:relative; margin-bottom:0; }
+.search-input { width:100%; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:10px 16px 10px 38px; font-size:14px; color:#fff; outline:none; }
+.search-input::placeholder { color:rgba(255,255,255,0.4); }
+.search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:16px; opacity:0.5; }
+
+/* FILTER TABS */
+.filter-wrap { display:flex; gap:8px; padding:14px 20px 12px; overflow-x:auto; scrollbar-width:none; background:#fff; border-bottom:1px solid var(–border); }
+.filter-wrap::-webkit-scrollbar { display:none; }
+.filter-btn { flex-shrink:0; padding:7px 16px; border-radius:20px; border:1.5px solid var(–border); background:#fff; font-size:12px; font-weight:600; color:var(–text-dim); cursor:pointer; transition:all 0.2s; white-space:nowrap; font-family:inherit; }
+.filter-btn.active { border-color:var(–green); background:var(–green-dim); color:var(–green); }
+
+/* CONTENT */
+.content { padding:16px 16px 80px; max-width:520px; margin:0 auto; }
+
+/* CATEGORY HEADER */
+.cat-header { display:flex; align-items:center; gap:10px; margin:20px 0 12px; }
+.cat-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.cat-title { font-family:Georgia,serif; font-size:19px; font-weight:700; }
+.cat-count { font-size:11px; color:var(–text-dim); margin-left:auto; font-weight:600; }
+
+/* EXERCISE CARD */
+.ex-card { background:var(–card); border:1px solid var(–border); border-radius:18px; margin-bottom:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.05); transition:box-shadow 0.2s; }
+.ex-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+
+.ex-header { display:flex; align-items:center; gap:14px; padding:14px 16px; cursor:pointer; }
+.ex-img-wrap { width:70px; height:70px; border-radius:12px; overflow:hidden; flex-shrink:0; background:var(–bg2); display:flex; align-items:center; justify-content:center; }
+.ex-img-wrap img { width:100%; height:100%; object-fit:cover; }
+.ex-img-placeholder { font-size:28px; }
+.ex-info { flex:1; min-width:0; }
+.ex-name { font-size:15px; font-weight:700; color:var(–text); margin-bottom:3px; }
+.ex-muscle { font-size:12px; color:var(–text-dim); margin-bottom:6px; }
+.ex-tags { display:flex; gap:5px; flex-wrap:wrap; }
+.tag { font-size:10px; font-weight:600; padding:2px 8px; border-radius:10px; letter-spacing:0.5px; }
+.tag.machine { background:var(–sky-dim); color:var(–sky); }
+.tag.dumbbell { background:var(–purple-dim); color:var(–purple); }
+.tag.bodyweight { background:var(–green-dim); color:var(–green); }
+.tag.barbell { background:var(–amber-dim); color:var(–amber); }
+.tag.cable { background:rgba(16,112,160,0.08); color:#1070A0; }
+.tag.beginner { background:var(–green-dim); color:var(–green); }
+.tag.intermediate { background:var(–amber-dim); color:var(–amber); }
+.ex-expand-btn { width:28px; height:28px; border-radius:50%; border:1.5px solid var(–border); background:none; font-size:15px; color:var(–text-dim); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0; }
+.ex-expand-btn.open { background:var(–green); border-color:var(–green); color:#fff; transform:rotate(45deg); }
+
+/* DETAIL PANEL */
+.ex-detail { display:none; border-top:1px solid var(–border); }
+.ex-detail.open { display:block; }
+
+.ex-gif-wrap { width:100%; aspect-ratio:16/9; background:#F0F4EC; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.ex-gif-wrap img { width:100%; height:100%; object-fit:cover; }
+.ex-gif-loading { text-align:center; color:var(–text-dim); font-size:13px; padding:30px; }
+.ex-gif-loading .spin { display:inline-block; font-size:24px; animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.ex-body { padding:16px; }
+
+.detail-section { margin-bottom:14px; }
+.detail-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(–text-dim); font-weight:700; margin-bottom:8px; }
+
+.how-to-list { list-style:none; }
+.how-to-list li { display:flex; gap:10px; padding:6px 0; border-bottom:1px solid var(–bg2); font-size:13px; line-height:1.6; color:var(–text); }
+.how-to-list li:last-child { border-bottom:none; }
+.step-num { width:20px; height:20px; border-radius:50%; background:var(–green); color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+
+.tip-row { background:var(–green-dim); border-radius:12px; padding:10px 12px; margin-bottom:6px; display:flex; gap:8px; align-items:flex-start; }
+.tip-row .tip-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+.tip-row .tip-text { font-size:13px; color:var(–text); line-height:1.6; }
+
+.warn-row { background:var(–coral-dim); border-radius:12px; padding:10px 12px; margin-bottom:6px; display:flex; gap:8px; align-items:flex-start; }
+.warn-row .warn-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+.warn-row .warn-text { font-size:13px; color:var(–coral); line-height:1.6; font-weight:500; }
+
+.muscle-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.muscle-chip { font-size:12px; padding:4px 12px; border-radius:20px; font-weight:600; }
+.muscle-chip.primary { background:var(–green-dim); color:var(–green); border:1px solid var(–green-mid); }
+.muscle-chip.secondary { background:var(–bg2); color:var(–text-dim); border:1px solid var(–border); }
+
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.stat-chip { background:var(–bg2); border-radius:12px; padding:10px; text-align:center; }
+.stat-chip .sv { font-family:Georgia,serif; font-size:18px; font-weight:700; color:var(–green); }
+.stat-chip .sl { font-size:10px; color:var(–text-dim); margin-top:2px; text-transform:uppercase; letter-spacing:1px; }
+
+/* EMPTY */
+.empty { text-align:center; padding:60px 20px; color:var(–text-dim); }
+.empty-icon { font-size:40px; margin-bottom:12px; }
+
+/* HIDDEN */
+.ex-card[data-hidden=“true”] { display:none; }
+.cat-section[data-hidden=“true”] { display:none; }
+</style>
+
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>Exercise Library</h1>
+      <div class="header-sub">คลังท่าออกกำลังกาย พร้อมรูป + Tips</div>
+    </div>
+    <div class="ex-count" id="ex-count">45 ท่า</div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search" placeholder="ค้นหาท่า เช่น squat, chest..." oninput="filterExercises()">
+  </div>
+</div>
+
+<div class="filter-wrap">
+  <button class="filter-btn active" onclick="setFilter('all',this)">ทั้งหมด</button>
+  <button class="filter-btn" onclick="setFilter('upper',this)">💪 Upper</button>
+  <button class="filter-btn" onclick="setFilter('lower',this)">🦵 Lower</button>
+  <button class="filter-btn" onclick="setFilter('core',this)">🧘 Core</button>
+  <button class="filter-btn" onclick="setFilter('dumbbell',this)">🏋️ Dumbbell</button>
+  <button class="filter-btn" onclick="setFilter('machine',this)">⚙️ Machine</button>
+  <button class="filter-btn" onclick="setFilter('bodyweight',this)">🤸 Bodyweight</button>
+</div>
+
+<div class="content" id="content">
+  <!-- Generated by JS -->
+</div>
+
+<script>
+const EXERCISES = [
+  // ==================== UPPER — CHEST ====================
+  {
+    id:'chest_press', name:'Chest Press', nameEn:'Chest Press',
+    category:'upper', subcat:'chest', tags:['machine','beginner'],
+    muscle:['อกส่วนกลาง (Pectoralis Major)'], secondary:['ไหล่หน้า','Triceps'],
+    sets:'3', reps:'10–12', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/chest-press-machine.gif',
+    steps:['นั่งให้หลังชิดพนักพิง ปรับที่นั่งให้มือจับระดับอก','จับ handle กว้างกว่าไหล่เล็กน้อย','หายใจออก ดันออกไปตรงๆ จนแขนเกือบเหยียดตรง','หายใจเข้า ค่อยๆ ดึงกลับช้าๆ 3 วินาที'],
+    tips:['หลังชิดพนักพิงตลอด อย่าให้หลังลอย','จุดสูงสุด อย่าล็อกข้อศอกสนิท ให้งอเล็กน้อย','ขาวางราบกับพื้น ไม่ยกขึ้น'],
+    warnings:['อย่าปล่อยน้ำหนักกลับเร็ว ควบคุมทุก phase','ถ้าเจ็บไหล่ให้ลดน้ำหนักหรือตรวจท่า']
+  },
+  {
+    id:'incline_bench', name:'Flat Bench Press 45°', nameEn:'Incline Bench Press',
+    category:'upper', subcat:'chest', tags:['barbell','dumbbell','beginner'],
+    muscle:['อกส่วนบน (Upper Pectoralis)'], secondary:['ไหล่หน้า','Triceps'],
+    sets:'3', reps:'10', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-incline-press.gif',
+    steps:['ปรับม้านั่ง 30–45 องศา','จับดัมเบลล์ระดับอก ข้อศอกงอ 90°','หายใจออก ดันขึ้นตรง มือเข้าหากันเล็กน้อยด้านบน','หายใจเข้า ลงช้าๆ 3 วินาที ข้อศอกลง 45°'],
+    tips:['องศา 30–45° ดี ถ้ามากกว่านี้จะเป็น shoulder press แทน','ห้ามแอ่นหลังมากเพื่อเพิ่มน้ำหนัก','มองเพดานตรงๆ ไม่หันคอ'],
+    warnings:['45° ขึ้นไปเริ่มใช้ไหล่มากขึ้น เสี่ยงบาดเจ็บ','อย่าลดดัมเบลล์ต่ำกว่าไหล่']
+  },
+
+  // ==================== UPPER — BACK ====================
+  {
+    id:'lat_pulldown', name:'Lat Pull Down', nameEn:'Lat Pulldown',
+    category:'upper', subcat:'back', tags:['machine','cable','beginner'],
+    muscle:['กล้ามเนื้อหลังกว้าง (Latissimus Dorsi)'], secondary:['Biceps','หลังกลาง','Rear Delt'],
+    sets:'3', reps:'12', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/lat-pulldown.gif',
+    steps:['นั่ง ล็อกต้นขาไว้ใต้ pad ปรับให้แน่น','จับ bar กว้างกว่าไหล่ มือคว่ำ','หายใจออก ดึงลงมาถึงระดับคาง เอียงลำตัวหลังเล็กน้อย','หายใจเข้า ปล่อยกลับช้าๆ แขนเหยียดเต็มที่'],
+    tips:['ดึงด้วย "ข้อศอก" ไม่ใช่มือ ให้นึกว่ากำลังกดข้อศอกลง','บีบสะบักเข้าหากันตอนดึงลงสุด','ก้มหน้าเล็กน้อย bar ผ่านหน้า ไม่ต้องก้มมาก'],
+    warnings:['อย่าดึงไปด้านหลังหัว เสี่ยงบาดเจ็บคอและไหล่','ไม่แกว่งลำตัวหนักเกินไป']
+  },
+  {
+    id:'seated_row', name:'Seated Row', nameEn:'Cable Seated Row',
+    category:'upper', subcat:'back', tags:['machine','cable','beginner'],
+    muscle:['หลังกลาง (Rhomboids, Mid Traps)'], secondary:['Biceps','Lat','Rear Delt'],
+    sets:'3', reps:'12', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/cable-seated-row.gif',
+    steps:['นั่งตัวตรง เข่างอเล็กน้อย จับ handle','หายใจออก ดึง handle เข้าท้อง ข้อศอกชิดลำตัว','บีบสะบักเข้าหากันตอนสุด ค้าง 1 วิ','หายใจเข้า เหยียดแขนกลับ ให้ลำตัวไม่โยกไปข้างหน้า'],
+    tips:['อย่าโยกลำตัวหน้าหลัง ให้มันิ่ง','ดึงด้วยหลัง ไม่ใช่แขน — ลองนึกว่า "เอาข้อศอกแตะด้านหลัง"','ช้าขาออก 3 วิ ให้กล้ามเนื้อทำงานเต็มที่'],
+    warnings:['ถ้าหลังล่างเจ็บ แสดงว่าโยกเกินไปหรือน้ำหนักหนักเกิน','ไม่ยืดหลังไปข้างหน้ามากเกินไป']
+  },
+  {
+    id:'dumbbell_row', name:'Single Arm Dumbbell Row', nameEn:'One Arm DB Row',
+    category:'upper', subcat:'back', tags:['dumbbell','beginner'],
+    muscle:['หลังกว้าง (Lat)'], secondary:['หลังกลาง','Biceps','Rear Delt'],
+    sets:'3', reps:'10–12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/single-arm-dumbbell-row.gif',
+    steps:['วางมือและเข่าข้างเดียวกันบนม้านั่ง หลังตรงขนานพื้น','จับดัมเบลล์มืออีกข้าง แขนห้อยตรง','หายใจออก ดึงดัมเบลล์ขึ้นข้างลำตัว ข้อศอกชี้ขึ้น','หายใจเข้า ลงช้าๆ แขนเหยียดเต็มที่'],
+    tips:['หลังต้องตรง ขนานพื้น ไม่บิดลำตัว','ดึงให้ข้อศอกขึ้นสูงกว่าหลัง','มองพื้น อย่ายกหัว'],
+    warnings:['อย่าบิดลำตัวเพื่อช่วยดึง ถือว่า cheat','ถ้าเจ็บข้อมือให้ใช้ wrist strap']
+  },
+
+  // ==================== UPPER — SHOULDER ====================
+  {
+    id:'shoulder_press', name:'Shoulder Press', nameEn:'Dumbbell Shoulder Press',
+    category:'upper', subcat:'shoulder', tags:['dumbbell','machine','beginner'],
+    muscle:['ไหล่หน้า (Anterior Deltoid)'], secondary:['ไหล่กลาง','Triceps','Trap'],
+    sets:'3', reps:'12', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/09/dumbbell-shoulder-press.gif',
+    steps:['นั่งตัวตรง พนักพิง 90° จับดัมเบลล์ระดับไหล่','ข้อศอกงอ 90° หรือพับ 30° ตามโปรแกรม','หายใจออก ดันขึ้นตรง มือเข้าหากันเล็กน้อยด้านบน','หายใจเข้า ลงช้าๆ 3 วินาที กลับท่าเริ่ม'],
+    tips:['นั่งพิงพนักพิง 90° ช่วยป้องกัน rotator cuff บาดเจ็บ','ข้อมือตรง ไม่งอ','อย่าล็อกข้อศอกด้านบนสนิท'],
+    warnings:['อย่าดันเกินศีรษะมากหากไหล่ tight','เจ็บไหล่ด้านหน้า = น้ำหนักหนักเกิน หรือ range of motion กว้างเกิน']
+  },
+  {
+    id:'lateral_raise', name:'Lateral Side Raise', nameEn:'Lateral Raise',
+    category:'upper', subcat:'shoulder', tags:['dumbbell','beginner'],
+    muscle:['ไหล่กลาง (Lateral Deltoid)'], secondary:['ไหล่หน้า','Trap'],
+    sets:'3', reps:'15', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/dumbbell-lateral-raise.gif',
+    steps:['ยืนหรือนั่ง จับดัมเบลล์เบาๆ ข้างลำตัว','ข้อศอกงอเล็กน้อย 10–15°','หายใจออก ยกออกด้านข้างจนขนานพื้น','หายใจเข้า ลงช้าๆ 3 วินาที'],
+    tips:['ยกเฉพาะถึงระดับไหล่ ไม่ต้องสูงกว่า','ข้อมือหมุนเล็กน้อยให้นิ้วก้อยสูงกว่านิ้วโป้ง (เหมือนเทน้ำออก)','ใช้น้ำหนักเบา ทำช้า ดีกว่าหนักแต่แกว่ง'],
+    warnings:['อย่ายกสูงกว่าไหล่มาก เสี่ยง impingement','ไม่แกว่งลำตัวช่วย']
+  },
+  {
+    id:'face_pull', name:'Face Pull', nameEn:'Cable Face Pull',
+    category:'upper', subcat:'shoulder', tags:['cable','machine','intermediate'],
+    muscle:['ไหล่หลัง (Rear Deltoid)'], secondary:['หลังบน','Rotator Cuff'],
+    sets:'3', reps:'15', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/06/face-pull.gif',
+    steps:['ตั้ง cable ระดับหน้าหรือสูงกว่า ใช้ rope attachment','จับ rope มือคว่ำ ก้าวถอยหลัง 1–2 ก้าว','หายใจออก ดึงมาที่หน้า แยกมือออกจากกัน ข้อศอกสูง','หายใจเข้า ปล่อยกลับช้าๆ'],
+    tips:['ข้อศอกต้องสูงกว่าไหล่ตลอด','จุดสุดท้ายของการดึง มือควรอยู่ข้างหูทั้งสองข้าง','ท่านี้ดีมากสำหรับ posture และป้องกันบาดเจ็บไหล่'],
+    warnings:['อย่าใช้น้ำหนักหนักเกิน ท่าสำคัญกว่า','ถ้าไม่มี cable ใช้ band แทนได้']
+  },
+
+  // ==================== UPPER — ARMS ====================
+  {
+    id:'bicep_curl', name:'Biceps Curl', nameEn:'Dumbbell Bicep Curl',
+    category:'upper', subcat:'arms', tags:['dumbbell','beginner'],
+    muscle:['Biceps Brachii'], secondary:['Brachialis','Forearm'],
+    sets:'3', reps:'12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-bicep-curl.gif',
+    steps:['ยืนหรือนั่ง จับดัมเบลล์มือหงาย ข้างลำตัว','ข้อศอกชิดลำตัวตลอด ไม่ขยับไปข้างหน้า','หายใจออก ม้วนดัมเบลล์ขึ้นหา shoulder','หายใจเข้า ลงช้าๆ จนแขนเหยียดเต็มที่'],
+    tips:['บีบ biceps ตอนอยู่ด้านบน ค้าง 1 วิ','ลงช้า (3 วิ) ได้ผลดีกว่าขึ้นเร็ว','ทำสลับมือหรือพร้อมกันก็ได้'],
+    warnings:['ข้อศอกห้ามขยับไปข้างหน้า — ถ้าขยับแปลว่าหนักเกิน','ไม่แกว่งหลังช่วย']
+  },
+  {
+    id:'hammer_curl', name:'Hammer Curl', nameEn:'Hammer Curl',
+    category:'upper', subcat:'arms', tags:['dumbbell','beginner'],
+    muscle:['Brachialis','Biceps'], secondary:['Forearm'],
+    sets:'3', reps:'12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-hammer-curl.gif',
+    steps:['จับดัมเบลล์มือตั้ง (thumb up) ข้างลำตัว','ข้อศอกชิดลำตัว','ม้วนขึ้นจนดัมเบลล์ใกล้ไหล่','ลงช้าๆ จนแขนเหยียด'],
+    tips:['Hammer curl เน้น Brachialis ทำให้แขนดูหนาและกว้างขึ้น','ทำสลับมือหรือพร้อมกัน','รูปแบบ neutral grip ลด stress ที่ข้อมือ'],
+    warnings:['อย่าแกว่งข้อศอก','ไม่ต้องหมุนมือ ให้ thumb ชี้ขึ้นตลอด']
+  },
+  {
+    id:'tricep_pushdown', name:'Triceps Curl / Pushdown', nameEn:'Cable Tricep Pushdown',
+    category:'upper', subcat:'arms', tags:['cable','machine','beginner'],
+    muscle:['Triceps Brachii'], secondary:['Forearm'],
+    sets:'3', reps:'12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/cable-triceps-pushdown.gif',
+    steps:['ตั้ง cable สูง จับ bar หรือ rope มือคว่ำ','ข้อศอกชิดลำตัว ตั้งฉากกับพื้น','หายใจออก กด/ดันลงจนแขนเหยียด บีบ Triceps','หายใจเข้า งอข้อศอกกลับ ช้าๆ'],
+    tips:['ข้อศอกต้องนิ่ง ไม่ขยับออก','บีบแขนค้าง 1 วิตอนล่างสุด','ถ้าใช้ rope แยกมือออกตอนล่างสุด'],
+    warnings:['อย่าก้มตัวหน้าเพื่อช่วยดัน','ถ้าข้อศอกเจ็บลดน้ำหนัก']
+  },
+  {
+    id:'overhead_tricep', name:'Overhead Tricep Extension', nameEn:'Overhead Tricep Extension',
+    category:'upper', subcat:'arms', tags:['dumbbell','cable','beginner'],
+    muscle:['Triceps (Long Head)'], secondary:['Shoulder'],
+    sets:'3', reps:'12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/09/overhead-tricep-extension.gif',
+    steps:['ยืนหรือนั่ง จับดัมเบลล์หนึ่งอันด้วยสองมือ ยกขึ้นเหนือศีรษะ','ข้อศอกชี้ขึ้นตรง ไม่แผ่ออก','หายใจเข้า งอข้อศอกลง ดัมเบลล์ลงหลังศีรษะ','หายใจออก ดันขึ้นจนแขนเหยียด'],
+    tips:['ท่านี้เน้น long head ของ Triceps ซึ่งมักถูก underwork','ข้อศอกอยู่นิ่ง ไม่แผ่ออกด้านข้าง','Core เกร็งเพื่อป้องกันหลังแอ่น'],
+    warnings:['ถ้าไหล่ tight อาจทำได้ไม่เต็ม ROM — ยืดก่อน','อย่าเร่ง — ท่านี้เสี่ยง Triceps strain ถ้าทำเร็ว']
+  },
+
+  // ==================== LOWER — QUADS ====================
+  {
+    id:'goblet_squat', name:'Goblet Squat', nameEn:'Goblet Squat',
+    category:'lower', subcat:'quads', tags:['dumbbell','beginner'],
+    muscle:['Quadriceps','Glutes'], secondary:['Hamstrings','Core','Adductors'],
+    sets:'3–4', reps:'10–12', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/goblet-squat.gif',
+    steps:['ยืนเท้ากว้างระดับไหล่หรือกว้างกว่าเล็กน้อย นิ้วเท้าแยกออก 30–45°','อุ้มดัมเบลล์ หรือ kettlebell ไว้หน้าอก','หายใจเข้า นั่งลงช้าๆ เข่าตามทิศนิ้วเท้า หลังตรง','หายใจออก ลุกขึ้นดัน heel ลงพื้น'],
+    tips:['ก้นลงต่ำกว่าเข่าถ้าทำได้ = deeper squat = glute มากขึ้น','มองตรง ไม่ก้ม หรือเงยหน้า','ดัมเบลล์หน้าอก ช่วย counterbalance ให้ตัวตรง'],
+    warnings:['เข่าห้ามพับเข้าด้านใน (valgus) — ถ้าเป็นแบบนี้ให้ลดน้ำหนัก','ถ้าส้นเท้าลอยให้ยืนกว้างขึ้นหรือใส่รองเท้า heel สูง']
+  },
+  {
+    id:'leg_press', name:'Leg Press', nameEn:'Leg Press Machine',
+    category:'lower', subcat:'quads', tags:['machine','beginner'],
+    muscle:['Quadriceps','Glutes'], secondary:['Hamstrings','Calves'],
+    sets:'3', reps:'12', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/leg-press.gif',
+    steps:['นั่งในเครื่อง หลังชิดพนัก เท้าวางบนแท่น กว้างระดับไหล่','ปลดล็อก ปล่อยน้ำหนักลงมา เข่างอ 90°','หายใจออก ดัน heel ออก ขาเหยียด แต่ไม่ lock เข่า','หายใจเข้า งอเข่ากลับช้าๆ'],
+    tips:['วางเท้าสูงขึ้นบนแท่น = เน้น glute มากขึ้น','วางเท้าต่ำ = เน้น quad','อย่า lock เข่าตอนดันสุด'],
+    warnings:['ห้ามปล่อยให้เข่าพับเกิน 90° มากเกินไปถ้าหลังไม่ชิดพนัก','ปลดล็อกก่อนและล็อกหลังทุกครั้ง']
+  },
+  {
+    id:'leg_extension', name:'Leg Extension', nameEn:'Leg Extension Machine',
+    category:'lower', subcat:'quads', tags:['machine','beginner'],
+    muscle:['Quadriceps (Isolation)'], secondary:[],
+    sets:'3', reps:'12–15', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/leg-extension.gif',
+    steps:['นั่งในเครื่อง หลังชิดพนัก ปรับให้ขาหลังเข่าพอดีขอบที่นั่ง','ปรับ pad ให้อยู่เหนือข้อเท้า ไม่ใช่กระดูกแข้ง','หายใจออก ยกขาขึ้นจนเหยียดตรง บีบ quad ค้าง 1 วิ','หายใจเข้า ลงช้าๆ ไม่ปล่อยตกอิสระ'],
+    tips:['ใช้เป็น warm-up ก่อน squat ได้ดี','บีบ quad ตอนบนสุด ช่วย mind-muscle connection','ลดน้ำหนักลงถ้า range of motion ไม่เต็ม'],
+    warnings:['ท่านี้ไม่แนะนำถ้ามีปัญหาเข่า (ACL/Patella)','อย่าใช้ momentum — ควบคุมทุก rep']
+  },
+
+  // ==================== LOWER — GLUTES & HAMSTRINGS ====================
+  {
+    id:'rdl', name:'RDL (Romanian Deadlift)', nameEn:'Romanian Deadlift',
+    category:'lower', subcat:'hamstrings', tags:['dumbbell','barbell','beginner'],
+    muscle:['Hamstrings','Glutes'], secondary:['หลังล่าง','Calves'],
+    sets:'3', reps:'10', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-romanian-deadlift.gif',
+    steps:['ยืนเท้ากว้างระดับสะโพก จับดัมเบลล์หน้าต้นขา','หายใจเข้า เกร็ง core ค่อยๆ โน้มตัวไปข้างหน้า สะโพกถอยหลัง','ดัมเบลล์เลื่อนใกล้ขาตลอด ลงจนรู้สึกตึง hamstring','หายใจออก ยืดสะโพกกลับ ลุกขึ้น'],
+    tips:['โน้มสะโพกไปหลัง ไม่ใช่ก้มหลัง — ความต่างสำคัญมาก','หลังตรงตลอด โก่งหรืองอไม่ได้','ลงแค่รู้สึกตึง hamstring — ไม่ต้องพยายามลงพื้น'],
+    warnings:['ถ้าหลังล่างเจ็บ แสดงว่าใช้หลังมากเกินไป ให้ลดน้ำหนัก','อย่า round หลังเด็ดขาด']
+  },
+  {
+    id:'hip_thrust', name:'Hip Thrust', nameEn:'Hip Thrust',
+    category:'lower', subcat:'glutes', tags:['barbell','dumbbell','bodyweight','beginner'],
+    muscle:['Glutes (Gluteus Maximus)'], secondary:['Hamstrings','Core'],
+    sets:'3', reps:'12', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/barbell-hip-thrust.gif',
+    steps:['พิงหลังบนม้านั่ง เท้าวางพื้น เข่างอ 90°','วางดัมเบลล์หรือ barbell บนสะโพก (ใช้ mat รอง)','หายใจออก ดัน hip ขึ้น บีบ glute ตอนบนสุด','หายใจเข้า ลงช้าๆ ก้นไม่แตะพื้น'],
+    tips:['บีบ glute ตอนบนสุดค้าง 2 วิ','เท้าวางให้เข่าตั้งฉาก 90° ตอนสุด','มองเพดาน คอตรง ไม่ก้มหน้า'],
+    warnings:['อย่าแอ่นหลังมากเกินไปตอนบนสุด — ให้เน้น glute ไม่ใช่หลัง','ใช้ pad หรือ mat รองเสมอ']
+  },
+  {
+    id:'walking_lunge', name:'Walking Lunges', nameEn:'Walking Lunges',
+    category:'lower', subcat:'quads', tags:['dumbbell','bodyweight','beginner'],
+    muscle:['Quadriceps','Glutes'], secondary:['Hamstrings','Core','Balance'],
+    sets:'3', reps:'10/leg', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-walking-lunge.gif',
+    steps:['ยืนตรง จับดัมเบลล์หรือไม่ถือก็ได้','ก้าวเท้าหน้าออกไป 1 ก้าวใหญ่','หายใจเข้า งอเข่าหน้าลง 90° เข่าหลังเกือบแตะพื้น','หายใจออก ดัน heel หน้าลุกขึ้น ก้าวเท้าหลังมาข้างหน้า ทำสลับ'],
+    tips:['ก้าวใหญ่พอให้เข่าหน้าไม่เลยปลายเท้า','ลำตัวตรง ไม่โน้มไปข้างหน้า','เริ่มจาก bodyweight ก่อน แล้วค่อยเพิ่ม dumbbell'],
+    warnings:['เข่าหน้าห้ามเลยปลายเท้า','ถ้าเข่าเจ็บลองลดช่วงก้าว']
+  },
+  {
+    id:'reverse_lunge', name:'Reverse Lunge', nameEn:'Reverse Lunge',
+    category:'lower', subcat:'quads', tags:['dumbbell','bodyweight','beginner'],
+    muscle:['Quadriceps','Glutes'], secondary:['Hamstrings','Balance'],
+    sets:'3', reps:'10/leg', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/reverse-lunge.gif',
+    steps:['ยืนตรง เท้าชิด','ก้าวเท้าหลังออกไปข้างหลัง 1 ก้าวใหญ่','หายใจเข้า งอเข่าหน้าลง เข่าหลังเกือบแตะพื้น','หายใจออก ดัน heel หน้าลุกขึ้น เท้าหลังกลับมา'],
+    tips:['ง่ายกว่า walking lunge เพราะไม่ต้องเดิน เหมาะสำหรับมือใหม่','เข่าหน้าอยู่เหนือ heel ตลอด','เพิ่มน้ำหนักดัมเบลล์เมื่อทำ bodyweight ได้แล้ว 15 rep'],
+    warnings:['อย่าก้าวสั้นเกิน — เข่าจะเลยปลายเท้า']
+  },
+  {
+    id:'step_up', name:'Step Up', nameEn:'Dumbbell Step Up',
+    category:'lower', subcat:'quads', tags:['dumbbell','bodyweight','beginner'],
+    muscle:['Quadriceps','Glutes'], secondary:['Hamstrings','Balance'],
+    sets:'3', reps:'12/leg', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-step-up.gif',
+    steps:['ยืนหน้ากล่องหรือม้านั่งสูง 40–50 cm','วางเท้าหน้าบนกล่อง เต็มฝ่าเท้า','หายใจออก ดัน heel กดลง ยกลำตัวขึ้น ยืนบนกล่อง','หายใจเข้า ลงเท้าหลังก่อน ช้าๆ'],
+    tips:['ดัน heel เพื่อเน้น glute — ไม่ใช่นิ้วเท้า','ยืนตรงบนกล่อง ไม่เอียง','เริ่มไม่ถือน้ำหนักก่อน'],
+    warnings:['กล่องต้องมั่นคง ไม่ขยับ','อย่าใช้เท้าหลังช่วยดัน — เอาแรงมาจากขาหน้า']
+  },
+  {
+    id:'leg_abduction', name:'Leg Abduction', nameEn:'Hip Abduction Machine',
+    category:'lower', subcat:'glutes', tags:['machine','beginner'],
+    muscle:['Gluteus Medius','TFL'], secondary:['Hip External Rotators'],
+    sets:'3', reps:'15', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/hip-abduction-machine.gif',
+    steps:['นั่งในเครื่อง pad อยู่ด้านนอกขา','หายใจออก เปิดขาออกด้านข้างสุด บีบ glute med ค้าง 1 วิ','หายใจเข้า หุบขากลับช้าๆ ไม่ปล่อยตก'],
+    tips:['ท่านี้เน้น glute medius ซึ่งช่วย hip stability มาก','นั่งตรง ไม่เอนหลัง','ทำได้เป็น warm-up ก่อน squat'],
+    warnings:['อย่าใช้น้ำหนักหนักเกิน ท่าสำคัญกว่า','ถ้าสะโพกด้านข้างเจ็บลดน้ำหนัก']
+  },
+  {
+    id:'leg_adduction', name:'Leg Adduction', nameEn:'Hip Adduction Machine',
+    category:'lower', subcat:'glutes', tags:['machine','beginner'],
+    muscle:['Adductors (Inner Thigh)'], secondary:['Gracilis'],
+    sets:'3', reps:'15', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/hip-adduction-machine.gif',
+    steps:['นั่งในเครื่อง pad อยู่ด้านในขา ขาเปิดออก','หายใจออก หุบขาเข้าหากัน บีบ inner thigh','หายใจเข้า เปิดขากลับช้าๆ'],
+    tips:['ทำ superset กับ abduction ประหยัดเวลา','นั่งตรง ไม่เอนหน้า','Range of motion เต็มที่เพื่อผล inner thigh'],
+    warnings:['อย่าหนักเกินจนต้องโยกตัวช่วย','ถ้า groin เจ็บ หยุดทันที']
+  },
+  {
+    id:'kickback', name:'Kick Back', nameEn:'Cable Kickback',
+    category:'lower', subcat:'glutes', tags:['cable','machine','bodyweight','beginner'],
+    muscle:['Glutes (Gluteus Maximus)'], secondary:['Hamstrings'],
+    sets:'3', reps:'15/leg', rest:'45s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/06/cable-hip-extension.gif',
+    steps:['ใช้ cable ระดับข้อเท้า หรือ bodyweight ก้มมือจับผนัง','ยืนขาหนึ่ง เกร็ง core ให้ balance','หายใจออก ยกขาไปด้านหลัง บีบ glute ตอนสุด','หายใจเข้า ลงช้าๆ ไม่วางเท้าพื้น'],
+    tips:['ยกขาโดยบีบ glute ไม่ใช่แอ่นหลัง','ยกแค่ขนานพื้น ไม่ต้องสูงกว่า','ทำช้าๆ มีสติ ดีกว่าเร็ว'],
+    warnings:['ห้ามแอ่นหลังเพื่อยกขาสูงขึ้น','ถ้าหลังล่างเจ็บแสดงว่าแอ่นเกิน']
+  },
+
+  // ==================== CORE ====================
+  {
+    id:'plank', name:'Plank', nameEn:'Forearm Plank',
+    category:'core', subcat:'core', tags:['bodyweight','beginner'],
+    muscle:['Core (Transverse Abdominis)'], secondary:['Obliques','Shoulders','Glutes'],
+    sets:'3', reps:'30–45s', rest:'45s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/08/plank.gif',
+    steps:['คว่ำหน้า วางข้อศอกใต้ไหล่ ปลายเท้าจิก','ยกลำตัวขึ้น ลำตัวตรงจากหัวถึงส้นเท้า','หายใจปกติ เกร็ง core ตลอด','ค้างตามเวลาที่กำหนด'],
+    tips:['กดข้อศอกลงพื้น ช่วยเพิ่มความมั่นคง','อย่ายกก้นขึ้นสูง หรือปล่อยก้นห้อย','มองพื้น คอในแนวเดียวกับกระดูกสันหลัง','เริ่มจาก 20 วิ แล้วค่อยๆ เพิ่ม'],
+    warnings:['ถ้าหลังล่างเจ็บแสดงว่าก้นห้อยลงเกิน','อย่ากลั้นหายใจ']
+  },
+  {
+    id:'side_plank', name:'Side Plank', nameEn:'Side Plank',
+    category:'core', subcat:'core', tags:['bodyweight','beginner'],
+    muscle:['Obliques (Side Core)'], secondary:['Glute Med','Shoulder'],
+    sets:'3', reps:'30s/side', rest:'45s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/side-plank.gif',
+    steps:['นอนตะแคง วางข้อศอกใต้ไหล่','ยกสะโพกขึ้นให้ลำตัวตรง','มืออีกข้างวางสะโพกหรือยกขึ้น','ค้างตามเวลา แล้วสลับข้าง'],
+    tips:['ลำตัวต้องตรง ไม่โค้ง','เวอร์ชันง่าย: งอเข่าลงพื้นได้','เวอร์ชันยาก: ยกขาบนขึ้น'],
+    warnings:['ถ้าไหล่เจ็บเปลี่ยนมือ แทนข้อศอก']
+  },
+  {
+    id:'dead_bug', name:'Dead Bug', nameEn:'Dead Bug',
+    category:'core', subcat:'core', tags:['bodyweight','beginner'],
+    muscle:['Core (Deep Stabilizers)'], secondary:['Obliques','Hip Flexors'],
+    sets:'2–3', reps:'10/side', rest:'45s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dead-bug.gif',
+    steps:['นอนหงาย ยกขาขึ้น เข่างอ 90° ยกมือขึ้นตรง','หายใจออก เหยียดขาขวากับมือซ้ายพร้อมกันลงใกล้พื้น (ไม่แตะ)','หายใจเข้า ดึงกลับ','สลับข้าง ทำสลับกัน'],
+    tips:['หลังล่างต้องแนบพื้นตลอด — นี่คือสิ่งสำคัญที่สุด','ถ้าหลังลอยขึ้น แปลว่า range ยาวเกิน ให้เล็กลง','ทำช้าๆ มีสติทุก rep'],
+    warnings:['ห้ามหลังล่างลอยขึ้น','อย่ากลั้นหายใจ']
+  },
+  {
+    id:'crunch', name:'Crunch', nameEn:'Crunch',
+    category:'core', subcat:'core', tags:['bodyweight','beginner'],
+    muscle:['Rectus Abdominis (Upper Abs)'], secondary:['Obliques'],
+    sets:'3', reps:'15–20', rest:'45s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/crunch.gif',
+    steps:['นอนหงาย งอเข่า เท้าวางพื้น','มือข้างหัวเบาๆ ไม่ดึงคอ','หายใจออก ยกไหล่ขึ้นจากพื้น บีบท้อง','หายใจเข้า ลงช้าๆ ไม่วางหัวพื้น'],
+    tips:['ยกแค่ไหล่ ไม่ใช่ทั้งหลัง','บีบท้องตอนบนสุด ค้าง 1 วิ','อย่าดึงคอ วางมือข้างหัวแบบ butterfly'],
+    warnings:['ถ้าคอเจ็บแปลว่าดึงคอมากเกิน','Crunch ไม่ช่วยลดไขมันหน้าท้อง — ต้อง deficit calories']
+  },
+  {
+    id:'mountain_climber', name:'Mountain Climber', nameEn:'Mountain Climber',
+    category:'core', subcat:'core', tags:['bodyweight','beginner'],
+    muscle:['Core','Hip Flexors'], secondary:['Shoulders','Cardio'],
+    sets:'3', reps:'20s–30s', rest:'45s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/mountain-climbers.gif',
+    steps:['อยู่ในท่า push-up สูง (แขนเหยียด) ลำตัวตรง','วิ่งสลับขา ดึงเข่าเข้าหาอก','เร็วหรือช้าตามต้องการ','เกร็ง core ตลอด'],
+    tips:['เริ่มช้าๆ เน้น form ก่อน แล้วค่อยเร็ว','ก้นอย่ายกสูง ลำตัวตรง','ใช้เป็น warm-up หรือ finisher ได้'],
+    warnings:['ถ้าข้อมือเจ็บใช้ push-up handle หรือ fist plank แทน']
+  },
+
+  // ==================== DUMBBELL EXTRAS ====================
+  {
+    id:'db_fly', name:'Dumbbell Fly', nameEn:'Dumbbell Chest Fly',
+    category:'upper', subcat:'chest', tags:['dumbbell','intermediate'],
+    muscle:['Pectoralis Major (Stretch)'], secondary:['Anterior Deltoid'],
+    sets:'3', reps:'12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-chest-fly.gif',
+    steps:['นอนบนม้านั่ง จับดัมเบลล์ยกขึ้นเหนืออก แขนเกือบเหยียด','หายใจเข้า เปิดแขนออกด้านข้าง ข้อศอกงอเล็กน้อย','รู้สึกตึงอกสุด แล้วหายใจออก ปิดแขนกลับ','ไม่ต้องชนดัมเบลล์ด้านบน'],
+    tips:['เน้น stretch ของอกมากกว่าน้ำหนัก','ข้อศอกงอเล็กน้อยตลอด — อย่าเหยียดตรง เสี่ยงข้อศอกบาดเจ็บ','ใช้น้ำหนักเบากว่า chest press เสมอ'],
+    warnings:['อย่าเปิดแขนลึกเกินไป — รู้สึกตึงพอ ไม่เจ็บ','ไม่แนะนำถ้าไหล่บาดเจ็บอยู่']
+  },
+  {
+    id:'arnold_press', name:'Arnold Press', nameEn:'Arnold Press',
+    category:'upper', subcat:'shoulder', tags:['dumbbell','intermediate'],
+    muscle:['Deltoid (ทั้ง 3 ส่วน)'], secondary:['Triceps','Trap'],
+    sets:'3', reps:'10', rest:'90s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/09/arnold-press.gif',
+    steps:['นั่งตรง จับดัมเบลล์ระดับไหล่ มือหงาย ข้อศอกหน้าอก','หมุนมือออกด้านข้างพร้อมกับดันขึ้น','ด้านบนมือคว่ำ แขนเหยียด','ลงช้าๆ หมุนมือกลับหงาย'],
+    tips:['ท่านี้ครบทุก head ของ deltoid ในท่าเดียว','ทำช้าๆ ให้ครบ range of motion','เริ่มจากน้ำหนักเบากว่า shoulder press ปกติ'],
+    warnings:['ถ้าไหล่ tight ทำได้ไม่ครบ ROM อย่าฝืน','ไม่แนะนำถ้าเพิ่งเริ่มออกกำลังกาย — เรียน shoulder press ก่อน']
+  },
+  {
+    id:'db_pullover', name:'Dumbbell Pullover', nameEn:'DB Pullover',
+    category:'upper', subcat:'back', tags:['dumbbell','intermediate'],
+    muscle:['Lat','Chest (Upper)'], secondary:['Triceps','Serratus'],
+    sets:'3', reps:'12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/dumbbell-pullover.gif',
+    steps:['นอนขวางม้านั่ง ไหล่ถึงกลางหลังวางบนม้า','จับดัมเบลล์หนึ่งอันด้วยสองมือ ยกขึ้นเหนืออก','หายใจเข้า ลดดัมเบลล์ไปด้านหลังศีรษะ แขนเกือบตรง','หายใจออก ดึงกลับมาเหนืออก'],
+    tips:['รู้สึก stretch ที่อกและหลัง lat','ข้อศอกงอเล็กน้อย ไม่เหยียดตรงสนิท','ท่าดีสำหรับ rib cage expansion'],
+    warnings:['อย่าลดดัมเบลล์ต่ำเกินไปถ้าไหล่ยัง tight','ใช้น้ำหนักเบา เน้น stretch']
+  },
+
+  // ==================== BODYWEIGHT ====================
+  {
+    id:'push_up', name:'Push Up', nameEn:'Push Up',
+    category:'upper', subcat:'chest', tags:['bodyweight','beginner'],
+    muscle:['Chest','Triceps'], secondary:['Shoulders','Core'],
+    sets:'3', reps:'10–15', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/push-up.gif',
+    steps:['ท่าคว่ำ มือกว้างกว่าไหล่เล็กน้อย ปลายเท้าจิก','ลำตัวตรงจากหัวถึงส้น เกร็ง core','หายใจเข้า งอข้อศอกลงจนอกเกือบแตะพื้น','หายใจออก ดันขึ้น'],
+    tips:['ข้อศอกชี้ด้านหลัง-ข้าง ประมาณ 45° จากลำตัว','เวอร์ชันง่าย: เข่าลงพื้น','เวอร์ชันยาก: เท้าบนม้านั่ง (Decline)'],
+    warnings:['อย่าก้มหรือยกคอ','หลังห้ามแอ่นหรือโก่ง']
+  },
+  {
+    id:'dip', name:'Tricep Dip', nameEn:'Bench Dip',
+    category:'upper', subcat:'arms', tags:['bodyweight','beginner'],
+    muscle:['Triceps'], secondary:['Chest','Shoulder'],
+    sets:'3', reps:'10–12', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/bench-dip.gif',
+    steps:['นั่งขอบม้านั่ง มือจับขอบ นิ้วชี้ไปข้างหน้า','ยกตัวออกจากม้า เท้าวางพื้นหรือยื่นออก','หายใจเข้า งอข้อศอกลง 90° ลำตัวลง','หายใจออก ดันขึ้น'],
+    tips:['ยิ่งขายื่นออกไปมากยิ่งยาก','เกร็ง triceps ตอนดันขึ้น','อย่าลงต่ำเกินไปครั้งแรก'],
+    warnings:['ถ้าไหล่หน้าเจ็บ อย่าทำ — ท่านี้ stress ไหล่หน้ามาก','ไม่แนะนำถ้ามีปัญหา rotator cuff']
+  },
+  {
+    id:'glute_bridge', name:'Glute Bridge', nameEn:'Glute Bridge',
+    category:'lower', subcat:'glutes', tags:['bodyweight','beginner'],
+    muscle:['Glutes','Hamstrings'], secondary:['Core','Lower Back'],
+    sets:'3', reps:'15', rest:'45s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/glute-bridge.gif',
+    steps:['นอนหงาย งอเข่า เท้าวางพื้นห่างก้น 1 ฝ่ามือ','หายใจออก ดัน hip ขึ้น บีบ glute','ลำตัวตรงจากเข่าถึงไหล่','หายใจเข้า ลงช้าๆ ก้นไม่แตะพื้น'],
+    tips:['ง่ายกว่า hip thrust เริ่มจากนี่ดี','บีบ glute ค้าง 2 วิ ตอนบนสุด','เวอร์ชันยาก: ยกขาข้างหนึ่ง (Single-leg)'],
+    warnings:['ถ้าหลังล่างเจ็บแปลว่าใช้หลังแทน glute — ลดน้ำหนัก/ตรวจท่า']
+  },
+  {
+    id:'wall_sit', name:'Wall Sit', nameEn:'Wall Sit',
+    category:'lower', subcat:'quads', tags:['bodyweight','beginner'],
+    muscle:['Quadriceps','Glutes'], secondary:['Core'],
+    sets:'3', reps:'30–45s', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/wall-sit.gif',
+    steps:['ยืนพิงกำแพง ขาห่างกำแพง 1 ก้าว','ค่อยๆ ย่อตัวลงจนเข่างอ 90° เหมือนนั่งเก้าอี้','หลังแนบกำแพงตลอด','ค้างตามเวลา หายใจปกติ'],
+    tips:['เข่าต้องตั้งฉาก ไม่เลยปลายเท้า','ใช้เป็น active rest ระหว่าง set ได้','เวอร์ชันยาก: ยกขาข้างหนึ่ง'],
+    warnings:['ถ้าเข่าเจ็บให้ลดองศาลง ไม่ต้อง 90°']
+  },
+  {
+    id:'burpee', name:'Burpee', nameEn:'Burpee',
+    category:'core', subcat:'cardio', tags:['bodyweight','intermediate'],
+    muscle:['Full Body'], secondary:['Cardio','Core','Chest','Legs'],
+    sets:'3', reps:'10', rest:'60s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/burpee.gif',
+    steps:['ยืนตรง กระโดดขึ้น ตบมือเหนือหัว','ย่อตัวลง มือจับพื้น','กระโดดขาออกด้านหลัง ท่า plank','ทำ push-up 1 ครั้ง (optional)','กระโดดขากลับ ลุกขึ้น กระโดดซ้ำ'],
+    tips:['เริ่มช้าๆ เน้น form ก่อน','ถ้าหนักเกิน ข้ามขั้นตอนกระโดดได้','เป็น cardio + strength ในท่าเดียว'],
+    warnings:['ไม่แนะนำถ้าเข่าหรือข้อมือมีปัญหา','เริ่มด้วยจำนวนน้อยๆ ก่อน']
+  },
+
+  // ==================== STRETCHING ====================
+  {
+    id:'hip_flexor_stretch', name:'Hip Flexor Stretch', nameEn:'Kneeling Hip Flexor Stretch',
+    category:'core', subcat:'stretch', tags:['bodyweight','beginner'],
+    muscle:['Hip Flexors (Iliopsoas)'], secondary:['Quad','Lower Back'],
+    sets:'2', reps:'30s/side', rest:'15s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/kneeling-hip-flexor-stretch.gif',
+    steps:['คุกเข่าขาหนึ่ง อีกขาก้าวไปข้างหน้า','ดันสะโพกไปข้างหน้าช้าๆ จนรู้สึกตึงขาหลัง','ค้าง 30 วิ หายใจลึกๆ','สลับข้าง'],
+    tips:['ยิ่งดันสะโพกไปข้างหน้ายิ่งตึง','ตัวตรง ไม่ก้ม','ทำหลัง workout ทุกครั้ง'],
+    warnings:['ไม่ต้องเจ็บ แค่ตึง — ถ้าเจ็บถอยกลับมา']
+  },
+  {
+    id:'hamstring_stretch', name:'Hamstring Stretch', nameEn:'Standing Hamstring Stretch',
+    category:'lower', subcat:'stretch', tags:['bodyweight','beginner'],
+    muscle:['Hamstrings'], secondary:['Lower Back','Calves'],
+    sets:'2', reps:'30s/side', rest:'15s',
+    img:'https://www.inspireusafoundation.org/wp-content/uploads/2022/01/single-leg-hamstring-stretch.gif',
+    steps:['นั่งพื้น เหยียดขาหนึ่ง งอขาอีกข้าง เท้าชิดต้นขาข้างใน','โน้มตัวไปข้างหน้าตามขาเหยียด หลังตรง','มือจับปลายเท้าหรือน่องตามที่ทำได้','ค้าง 30 วิ หายใจลึกๆ'],
+    tips:['โน้มสะโพกไปข้างหน้า ไม่ใช่ก้มหลัง','ตึงพอ ไม่เจ็บ','ทำทุกวัน ช่วย hamstring tightness ดีมาก'],
+    warnings:['ห้ามดีดหรือกระตุก ยืดแบบ static เท่านั้น']
+  },
+];
+
+let currentFilter = 'all';
+
+function buildLibrary() {
+  const categories = [
+    { id:'upper', label:'💪 Upper Body', color:'#3D7A10', bg:'#F0F7EA', emoji:'💪' },
+    { id:'lower', label:'🦵 Lower Body', color:'#1070A0', bg:'#EAF3F8', emoji:'🦵' },
+    { id:'core',  label:'🧘 Core & Cardio', color:'#6040A0', bg:'#F0EAF8', emoji:'🧘' },
+  ];
+
+  const content = document.getElementById('content');
+  let html = '';
+  let totalShown = 0;
+
+  categories.forEach(cat => {
+    const exes = EXERCISES.filter(e => e.category === cat.id);
+    totalShown += exes.length;
+    html += `<div class="cat-section" data-cat="${cat.id}">
+      <div class="cat-header">
+        <div class="cat-icon" style="background:${cat.bg};color:${cat.color}">${cat.emoji}</div>
+        <div class="cat-title" style="color:${cat.color}">${cat.label.replace(/^[^\s]+ /,'')}</div>
+        <div class="cat-count">${exes.length} ท่า</div>
+      </div>`;
+    exes.forEach(ex => {
+      html += buildCard(ex);
+    });
+    html += '</div>';
+  });
+
+  content.innerHTML = html;
+  document.getElementById('ex-count').textContent = EXERCISES.length + ' ท่า';
+}
+
+function buildCard(ex) {
+  const tagHTML = ex.tags.map(t => `<span class="tag ${t}">${t}</span>`).join('');
+  const stepsHTML = ex.steps.map((s,i) => `<li><div class="step-num">${i+1}</div><span>${s}</span></li>`).join('');
+  const tipsHTML = ex.tips.map(t => `<div class="tip-row"><div class="tip-icon">💡</div><div class="tip-text">${t}</div></div>`).join('');
+  const warnHTML = ex.warnings.map(w => `<div class="warn-row"><div class="warn-icon">⚠️</div><div class="warn-text">${w}</div></div>`).join('');
+  const primaryChips = ex.muscle.map(m => `<span class="muscle-chip primary">${m}</span>`).join('');
+  const secondaryChips = ex.secondary.map(m => `<span class="muscle-chip secondary">${m}</span>`).join('');
+
+  return `<div class="ex-card" data-id="${ex.id}" data-cat="${ex.category}" data-tags="${ex.tags.join(' ')}" data-name="${ex.name.toLowerCase()} ${ex.nameEn.toLowerCase()}">
+    <div class="ex-header" onclick="toggleCard('${ex.id}')">
+      <div class="ex-img-wrap">
+        <img src="${ex.img}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${ex.name}">
+        <div class="ex-img-placeholder" style="display:none">💪</div>
+      </div>
+      <div class="ex-info">
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-muscle">${ex.muscle[0]}</div>
+        <div class="ex-tags">${tagHTML}</div>
+      </div>
+      <button class="ex-expand-btn" id="btn-${ex.id}">+</button>
+    </div>
+    <div class="ex-detail" id="detail-${ex.id}">
+      <div class="ex-gif-wrap">
+        <img src="${ex.img}" alt="${ex.name} animation" onerror="this.parentElement.innerHTML='<div class=\\'ex-gif-loading\\'>🔍 ค้นหาท่าใน YouTube: ${ex.nameEn}</div>'">
+      </div>
+      <div class="ex-body">
+        <div class="stats-row" style="margin-bottom:16px">
+          <div class="stat-chip"><div class="sv">${ex.sets}</div><div class="sl">Sets</div></div>
+          <div class="stat-chip"><div class="sv">${ex.reps}</div><div class="sl">Reps</div></div>
+          <div class="stat-chip"><div class="sv">${ex.rest}</div><div class="sl">Rest</div></div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">กล้ามเนื้อที่ใช้</div>
+          <div class="muscle-chips">${primaryChips}${secondaryChips}</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">วิธีทำ</div>
+          <ul class="how-to-list">${stepsHTML}</ul>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">💡 Tips & Tricks</div>
+          ${tipsHTML}
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-label">⚠️ ข้อควรระวัง</div>
+          ${warnHTML}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleCard(id) {
+  const detail = document.getElementById('detail-' + id);
+  const btn = document.getElementById('btn-' + id);
+  const isOpen = detail.classList.contains('open');
+  // close all others
+  document.querySelectorAll('.ex-detail.open').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.ex-expand-btn.open').forEach(b => b.classList.remove('open'));
+  if (!isOpen) {
+    detail.classList.add('open');
+    btn.classList.add('open');
+    setTimeout(() => detail.scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
+  }
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterExercises();
+}
+
+function filterExercises() {
+  const search = document.getElementById('search').value.toLowerCase().trim();
+  let shown = 0;
+
+  document.querySelectorAll('.ex-card').forEach(card => {
+    const name = card.dataset.name || '';
+    const cat = card.dataset.cat || '';
+    const tags = card.dataset.tags || '';
+
+    const matchSearch = !search || name.includes(search);
+    const matchFilter = currentFilter === 'all'
+      || cat === currentFilter
+      || tags.includes(currentFilter);
+
+    const visible = matchSearch && matchFilter;
+    card.dataset.hidden = !visible;
+    card.style.display = visible ? '' : 'none';
+    if (visible) shown++;
+  });
+
+  // hide/show category sections
+  document.querySelectorAll('.cat-section').forEach(sec => {
+    const anyVisible = sec.querySelectorAll('.ex-card:not([style*="display: none"]):not([style*="display:none"])').length > 0;
+    sec.style.display = anyVisible ? '' : 'none';
+  });
+
+  document.getElementById('ex-count').textContent = shown + ' ท่า';
+}
+
+buildLibrary();
+</script>
+
+</body>
+</html>
